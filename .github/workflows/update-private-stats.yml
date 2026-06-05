@@ -1,0 +1,103 @@
+name: Update Private Stats
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update private project stats in README
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node <<'SCRIPT'
+          const fs = require('fs');
+          const https = require('https');
+
+          const query = `{
+            viewer {
+              contributionsCollection { totalCommitContributions }
+              repositories(first: 30, privacy: PRIVATE, orderBy: {field: PUSHED_AT, direction: DESC}) {
+                nodes {
+                  name
+                  description
+                  primaryLanguage { name }
+                  defaultBranchRef { target { ... on Commit { history { totalCount } } } }
+                }
+              }
+            }
+          }`;
+
+          const body = JSON.stringify({ query });
+          const req = https.request({
+            hostname: 'api.github.com',
+            path: '/graphql',
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${process.env.GH_TOKEN}`,
+              'Content-Type': 'application/json',
+              'User-Agent': 'profile-stats-updater',
+            },
+          }, (res) => {
+            let data = '';
+            res.on('data', (c) => data += c);
+            res.on('end', () => {
+              const json = JSON.parse(data);
+              const nodes = json.data.viewer.repositories.nodes;
+              const picks = [
+                { key: 'Mento', label: 'Mento', desc: 'Social media platform', stack: 'Firebase, Node.js, React' },
+                { key: 'lumoscore-backend', label: 'LumosCore', desc: 'Backend API platform', stack: 'TypeScript, Node.js' },
+                { key: 'GamersGold', label: 'GamersGold', desc: 'Gaming commerce backend', stack: 'JavaScript, Firebase, Node.js' },
+                { key: 'spectrum-backend', label: 'Spectrum', desc: 'DeFi trading backend (Polymarket, LiFi, Privy)', stack: 'TypeScript, Express' },
+                { key: 'Huskey', label: 'Huskey', desc: 'Web3 utility services', stack: 'JavaScript, Node.js' },
+              ];
+
+              const rows = picks.map((p) => {
+                const repo = nodes.find((n) => n.name.toLowerCase() === p.key.toLowerCase() || n.name === p.key);
+                const commits = repo?.defaultBranchRef?.target?.history?.totalCount ?? 0;
+                return { ...p, commits };
+              }).filter((r) => r.commits > 0);
+
+              const total = rows.reduce((s, r) => s + r.commits, 0) || 1;
+              const bar = (pct) => {
+                const filled = Math.round(pct / 10);
+                return '`' + '█'.repeat(filled) + '░'.repeat(10 - filled) + '` ' + pct + '%';
+              };
+
+              const table = [
+                '| Project | What I Built | Stack | Commits | Share |',
+                '|:--------|:-------------|:------|--------:|------:|',
+                ...rows.map((r) => {
+                  const pct = Math.round((r.commits / total) * 100);
+                  return `| **${r.label}** | ${r.desc} | ${r.stack} | **${r.commits.toLocaleString()}** | ${bar(pct)} |`;
+                }),
+              ].join('\n');
+
+              const readme = fs.readFileSync('README.md', 'utf8');
+              const updated = readme.replace(
+                /<!-- PRIVATE_STATS_START -->[\s\S]*?<!-- PRIVATE_STATS_END -->/,
+                `<!-- PRIVATE_STATS_START -->\n${table}\n<!-- PRIVATE_STATS_END -->`
+              );
+              fs.writeFileSync('README.md', updated);
+            });
+          });
+          req.on('error', (e) => { console.error(e); process.exit(1); });
+          req.write(body);
+          req.end();
+          SCRIPT
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --staged --quiet || git commit -m "chore: auto-update private project stats"
+          git push
