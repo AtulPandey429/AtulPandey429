@@ -28,17 +28,53 @@ jobs:
 
           const query = `{
             viewer {
-              contributionsCollection { totalCommitContributions }
-              repositories(first: 30, privacy: PRIVATE, orderBy: {field: PUSHED_AT, direction: DESC}) {
-                nodes {
-                  name
-                  description
-                  primaryLanguage { name }
-                  defaultBranchRef { target { ... on Commit { history { totalCount } } } }
+              contributionsCollection {
+                commitContributionsByRepository(maxRepositories: 100) {
+                  repository { nameWithOwner }
+                  contributions { totalCount }
                 }
               }
             }
           }`;
+
+          const picks = [
+            {
+              label: 'LumosCore',
+              desc: 'Multi-chain DeFi backend — AMM, bridge, launchpad, DEX',
+              stack: 'TypeScript, Stellar, XRPL, Redis',
+              repos: [
+                'Blockchain-AI-Apps/lumoscore-backend',
+                'Blockchain-AI-Apps/xrp-xlm-bridge',
+                'Blockchain-AI-Apps/xrp-xlm-tools-backend',
+                'Blockchain-AI-Apps/xrp-data-monitoring',
+                'SaaS-Repo/Sorobonhooks',
+              ],
+            },
+            {
+              label: 'Mento',
+              desc: 'Social media platform',
+              stack: 'Firebase, Node.js, React',
+              repos: ['SaaS-Repo/Mento'],
+            },
+            {
+              label: 'GamersGold',
+              desc: 'Gaming commerce backend',
+              stack: 'JavaScript, Firebase, Node.js',
+              repos: ['SaaS-Repo/GamersGold'],
+            },
+            {
+              label: 'Spectrum',
+              desc: 'DeFi trading backend (Polymarket, LiFi, Privy)',
+              stack: 'TypeScript, Express',
+              repos: ['SaaS-Repo/spectrum-backend'],
+            },
+            {
+              label: 'Huskey',
+              desc: 'Web3 utility services',
+              stack: 'JavaScript, Node.js',
+              repos: ['SaaS-Repo/Huskey'],
+            },
+          ];
 
           const body = JSON.stringify({ query });
           const req = https.request({
@@ -59,33 +95,31 @@ jobs:
                 console.error('GraphQL error:', JSON.stringify(json.errors ?? json, null, 2));
                 process.exit(1);
               }
-              const nodes = json.data.viewer.repositories.nodes;
-              const picks = [
-                { key: 'Mento', label: 'Mento', desc: 'Social media platform', stack: 'Firebase, Node.js, React' },
-                { key: 'lumoscore-backend', label: 'LumosCore', desc: 'Multi-chain DeFi backend — AMM, bridge, launchpad, DEX', stack: 'TypeScript, Stellar, XRPL, Redis' },
-                { key: 'GamersGold', label: 'GamersGold', desc: 'Gaming commerce backend', stack: 'JavaScript, Firebase, Node.js' },
-                { key: 'spectrum-backend', label: 'Spectrum', desc: 'DeFi trading backend (Polymarket, LiFi, Privy)', stack: 'TypeScript, Express' },
-                { key: 'Huskey', label: 'Huskey', desc: 'Web3 utility services', stack: 'JavaScript, Node.js' },
-              ];
+
+              const byRepo = new Map(
+                json.data.viewer.contributionsCollection.commitContributionsByRepository.map((entry) => [
+                  entry.repository.nameWithOwner,
+                  entry.contributions.totalCount,
+                ])
+              );
 
               const rows = picks.map((p) => {
-                const repo = nodes.find((n) => n.name.toLowerCase() === p.key.toLowerCase() || n.name === p.key);
-                const commits = repo?.defaultBranchRef?.target?.history?.totalCount ?? 0;
+                const commits = p.repos.reduce((sum, repo) => sum + (byRepo.get(repo) ?? 0), 0);
                 return { ...p, commits };
-              }).filter((r) => r.commits > 0);
+              }).filter((r) => r.commits > 0).sort((a, b) => b.commits - a.commits);
 
               const total = rows.reduce((s, r) => s + r.commits, 0) || 1;
-              const bar = (pct) => {
-                const filled = Math.round(pct / 10);
+              const bar = (pct, commits) => {
+                const filled = commits > 0 ? Math.max(1, Math.round(pct / 10)) : 0;
                 return '`' + '█'.repeat(filled) + '░'.repeat(10 - filled) + '` ' + pct + '%';
               };
 
               const table = [
-                '| Project | What I Built | Stack | Commits | Share |',
-                '|:--------|:-------------|:------|--------:|------:|',
+                '| Project | What I Built | Stack | My Commits | Share |',
+                '|:--------|:-------------|:------|----------:|------:|',
                 ...rows.map((r) => {
                   const pct = Math.round((r.commits / total) * 100);
-                  return `| **${r.label}** | ${r.desc} | ${r.stack} | **${r.commits.toLocaleString()}** | ${bar(pct)} |`;
+                  return `| **${r.label}** | ${r.desc} | ${r.stack} | **${r.commits.toLocaleString()}** | ${bar(pct, r.commits)} |`;
                 }),
               ].join('\n');
 

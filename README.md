@@ -2,7 +2,7 @@
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0a0e1a,50:1a237e,100:0d47a1&height=200&section=header&text=Atul%20Pandey&fontSize=48&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Full-Stack%20%7C%20Web3%20%7C%20Fintech%20%7C%20Firebase&descSize=18&descAlignY=58&descAlign=50"/>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=24&duration=3000&pause=800&color=42A5F5&center=true&vCenter=true&multiline=true&width=780&lines=Building+Production+Backends+%F0%9F%9A%80;LumosCore+%7C+Spectrum+%7C+GamersGold+%7C+Mento;Stellar+%2F+XRPL+%7C+DeFi+%7C+Firebase;981%2B+Commits+%7C+29+Private+Repos" alt="Typing animation"/>
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=3000&pause=1000&color=42A5F5&center=true&vCenter=true&multiline=true&width=700&height=110&lines=Building+Production+Backends+%F0%9F%9A%80;LumosCore+%7C+Spectrum+%7C+Mento+%7C+GamersGold;981%2B+Commits+%7C+29+Private+Repos" alt="Typing animation"/>
 </p>
 
 <p align="center">
@@ -45,8 +45,7 @@ Mechanical Engineering → Software Engineer. I ship **production backends** for
 
 ## 💎 Spotlight — LumosCore
 
-> **[LumosCore](https://www.lumoscore.com/)** — unified multi-chain Web3 infrastructure (Stellar + XRPL).  
-> Org: `@Blockchain-AI-Apps` · Repo: `lumoscore-backend` · **900 commits** on my branch history.
+**[LumosCore](https://www.lumoscore.com/)** — unified multi-chain Web3 infrastructure (Stellar + XRPL) · `@Blockchain-AI-Apps` · **735+ commits** across core backend & bridge modules
 
 <table>
 <tr>
@@ -87,16 +86,14 @@ Mechanical Engineering → Software Engineer. I ship **production backends** for
 
 ## 🔒 Production Work (Private Repos)
 
-> Commit counts from default branch history. Names only — code stays private.
-
 <!-- PRIVATE_STATS_START -->
-| Project | What I Built | Stack | Commits | Share |
-|:--------|:-------------|:------|--------:|------:|
-| **Mento** | Social media platform | Firebase, Node.js, React | **1,160** | `████████░░` 38% |
-| **LumosCore** | Multi-chain DeFi backend — AMM, bridge, launchpad, DEX | TypeScript, Stellar, XRPL, Redis | **900** | `███████░░░` 29% |
-| **GamersGold** | Gaming commerce backend | JavaScript, Firebase, Node.js | **846** | `███████░░░` 28% |
-| **Spectrum** | DeFi trading backend (Polymarket, LiFi, Privy) | TypeScript, Express | **128** | `█░░░░░░░░░` 4% |
-| **Huskey** | Web3 utility services | JavaScript, Node.js | **28** | `░░░░░░░░░░` 1% |
+| Project | What I Built | Stack | My Commits | Share |
+|:--------|:-------------|:------|----------:|------:|
+| **LumosCore** | Multi-chain DeFi backend — AMM, bridge, launchpad, DEX | TypeScript, Stellar, XRPL, Redis | **735** | `██████░░░░` 55% |
+| **Mento** | Social media platform | Firebase, Node.js, React | **328** | `███░░░░░░░` 25% |
+| **GamersGold** | Gaming commerce backend | JavaScript, Firebase, Node.js | **216** | `██░░░░░░░░` 16% |
+| **Spectrum** | DeFi trading backend (Polymarket, LiFi, Privy) | TypeScript, Express | **39** | `░░░░░░░░░░` 3% |
+| **Huskey** | Web3 utility services | JavaScript, Node.js | **19** | `░░░░░░░░░░` 1% |
 <!-- PRIVATE_STATS_END -->
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%"/>
