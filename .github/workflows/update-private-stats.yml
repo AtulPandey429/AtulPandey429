@@ -16,8 +16,12 @@ jobs:
 
       - name: Update private project stats in README
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "Skipping: add a classic PAT with repo scope as repository secret GH_PAT"
+            exit 0
+          fi
           node <<'SCRIPT'
           const fs = require('fs');
           const https = require('https');
@@ -51,10 +55,14 @@ jobs:
             res.on('data', (c) => data += c);
             res.on('end', () => {
               const json = JSON.parse(data);
+              if (!json.data?.viewer) {
+                console.error('GraphQL error:', JSON.stringify(json.errors ?? json, null, 2));
+                process.exit(1);
+              }
               const nodes = json.data.viewer.repositories.nodes;
               const picks = [
                 { key: 'Mento', label: 'Mento', desc: 'Social media platform', stack: 'Firebase, Node.js, React' },
-                { key: 'lumoscore-backend', label: 'LumosCore', desc: 'Backend API platform', stack: 'TypeScript, Node.js' },
+                { key: 'lumoscore-backend', label: 'LumosCore', desc: 'Multi-chain DeFi backend — AMM, bridge, launchpad, DEX', stack: 'TypeScript, Stellar, XRPL, Redis' },
                 { key: 'GamersGold', label: 'GamersGold', desc: 'Gaming commerce backend', stack: 'JavaScript, Firebase, Node.js' },
                 { key: 'spectrum-backend', label: 'Spectrum', desc: 'DeFi trading backend (Polymarket, LiFi, Privy)', stack: 'TypeScript, Express' },
                 { key: 'Huskey', label: 'Huskey', desc: 'Web3 utility services', stack: 'JavaScript, Node.js' },
